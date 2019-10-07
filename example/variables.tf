@@ -1,5 +1,5 @@
 variable "region" {
-  description = "Namespace (e.g. `eg` or `cp`)"
+  description = "AWS Region"
   type        = string
   default     = "eu-central-1"
 }

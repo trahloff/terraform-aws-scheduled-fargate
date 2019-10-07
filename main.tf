@@ -8,6 +8,14 @@ locals {
   }
 }
 
+data "aws_region" "current" {}
+
+resource "aws_default_vpc" "_" {}
+
+data "aws_subnet_ids" "default" {
+  vpc_id = aws_default_vpc._.id
+}
+
 ##################################################################################################
 ############################################# Security ###########################################
 ##################################################################################################
@@ -89,8 +97,6 @@ resource "aws_ecs_cluster" "_" {
 ######################################### Scheduled Task #########################################
 ##################################################################################################
 
-data "aws_region" "current" {}
-
 data "template_file" "_" {
   template = var.task_definition
 
@@ -127,9 +133,14 @@ resource "aws_cloudwatch_event_target" "_" {
   ecs_target {
     launch_type         = "FARGATE"
     group               = local.prefix
-    task_count          = 1
-    platform_version    = "LATEST"
+    task_count          = var.task_count
+    platform_version    = var.task_platform_version
     task_definition_arn = aws_ecs_task_definition._.arn
 
+    network_configuration {
+      subnets          = data.aws_subnet_ids.default.ids # TODO: change to something like: var.task_subnets != [] ? var.task_subnets : data.aws_subnet_ids.default.ids
+      security_groups  = var.task_security_groups
+      assign_public_ip = var.task_assign_public_ip
+    }
   }
 }
