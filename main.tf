@@ -32,6 +32,8 @@ resource "aws_cloudwatch_log_group" "_" {
 }
 
 resource "aws_ecs_cluster" "_" {
+  count = var.ecs_cluster_id == "" ? 1 : 0
+
   name = "${local.prefix}-cluster"
   tags = local.common_tags
 }
