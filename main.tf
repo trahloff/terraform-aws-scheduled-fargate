@@ -81,8 +81,6 @@ resource "aws_cloudwatch_log_group" "_" {
 }
 
 resource "aws_ecs_cluster" "_" {
-  count = var.ecs_cluster_id == "" ? 1 : 0
-
   name = "${local.prefix}-cluster"
   tags = local.common_tags
 }
@@ -103,7 +101,7 @@ data "template_file" "_" {
 }
 
 resource "aws_ecs_task_definition" "_" {
-  family                   = "${local.prefix}"
+  family                   = local.prefix
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.task_cpu
@@ -114,29 +112,24 @@ resource "aws_ecs_task_definition" "_" {
 }
 
 resource "aws_cloudwatch_event_rule" "_" {
-  name        = "${local.prefix}-run-data-ingress-alliances"
-  description = "start data ingress"
-  is_enabled  = var.enabled
+  name                = "${local.prefix}-run-data-ingress-alliances"
+  description         = var.cloudwatch_description
+  is_enabled          = var.enabled
   schedule_expression = var.task_schedule_expression
 }
 
-# resource "aws_cloudwatch_event_target" "_" {
-#   target_id = "${local.prefix}-data-ingress-target-alliances"
-#   arn       = module.fargate.ecs_cluster_id
-#   rule      = aws_cloudwatch_event_rule.run_data_ingress_alliances.name
-#   role_arn  = aws_iam_role.ecs_events.arn
-#   input     = file("${path.module}/definitions/override_alliances.json")
+resource "aws_cloudwatch_event_target" "_" {
+  target_id = local.prefix
+  arn       = aws_ecs_cluster._.arn
+  rule      = aws_cloudwatch_event_rule._.name
+  role_arn  = aws_iam_role.ecs_events.arn
 
-#   ecs_target {
-#     launch_type         = "FARGATE"
-#     group               = "TOOLS"
-#     task_count          = 1
-#     platform_version    = "LATEST"
-#     task_definition_arn = aws_ecs_task_definition.data_ingress.arn
+  ecs_target {
+    launch_type         = "FARGATE"
+    group               = local.prefix
+    task_count          = 1
+    platform_version    = "LATEST"
+    task_definition_arn = aws_ecs_task_definition._.arn
 
-#     network_configuration {
-#       subnets = data.aws_subnet_ids.private.ids
-#     }
-#   }
-
-# }
+  }
+}

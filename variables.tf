@@ -57,8 +57,20 @@ variable "task_role" {
   default     = ""
 }
 
+variable "task_group" {
+  description = "ECS Cluster ARN. If not set, a new cluster will be created"
+  type        = string
+  default     = ""
+}
+
 variable "enabled" {
   description = "ECS Cluster ARN. If not set, a new cluster will be created"
   type        = bool
   default = true
+}
+
+variable "cloudwatch_description" {
+  description = "ECS Cluster ARN. If not set, a new cluster will be created"
+  type        = string
+  default     = ""
 }
