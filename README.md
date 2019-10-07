@@ -1,5 +1,8 @@
 # terraform-aws-scheduled-fargate
 
+[![GitHub Tag](https://img.shields.io/github/tag/trahloff/terraform-aws-scheduled-fargate.svg)](https://github.com/trahloff/terraform-aws-scheduled-fargate/releases) [![GitHub Release](https://img.shields.io/github/release/trahloff/terraform-aws-scheduled-fargate.svg)](https://github.com/trahloff/terraform-aws-scheduled-fargate/releases)
+
+
 ## Usage
 
 **IMPORTANT:** The `master` branch is used in `source` just as an example. In your code, do not pin to `master` because there may be breaking changes between releases.
