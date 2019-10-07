@@ -113,7 +113,7 @@ resource "aws_ecs_task_definition" "_" {
   cpu                      = var.task_cpu
   memory                   = var.task_memory
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  task_role_arn            = var.task_role != "" ? var.task_role : ""
+  task_role_arn            = var.task_role
   container_definitions    = data.template_file._.rendered
 }
 
