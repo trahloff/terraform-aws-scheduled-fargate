@@ -13,8 +13,8 @@ Straight from `example/`:
 ```hcl
 module "fargate_scheduler" {
   source    = "github.com/trahloff/terraform-aws-scheduled-fargate?ref=master"
-  namespace = var.namespace
-  stage     = var.stage
+  namespace = "namespace"
+  stage     = "prod"
 
   task_definition          = file("${path.module}/definitions/example-task.tpl")
   task_schedule_expression = "rate(1 minute)"
