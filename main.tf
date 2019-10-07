@@ -118,7 +118,7 @@ resource "aws_ecs_task_definition" "_" {
 }
 
 resource "aws_cloudwatch_event_rule" "_" {
-  name                = "${local.prefix}-run-data-ingress-alliances"
+  name                = local.prefix
   description         = var.cloudwatch_description
   is_enabled          = var.enabled
   schedule_expression = var.task_schedule_expression
