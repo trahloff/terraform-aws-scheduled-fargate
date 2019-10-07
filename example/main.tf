@@ -9,4 +9,6 @@ module "scheduler" {
 
   task_definition = file("${path.module}/definitions/example-task.tpl")
   override_definition = file("${path.module}/definitions/override_example.json")
+
+  task_schedule_expression = "rate(1 minute)"
 }

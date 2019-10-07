@@ -1,5 +1,5 @@
 locals {
-  prefix = "${var.stage}-${var.namespace}"
+  prefix = "${var.stage}-${var.namespace}-${var.name}"
 
   common_tags = {
     Namespace = var.namespace
@@ -16,12 +16,12 @@ locals {
 # =======================
 
 resource "aws_iam_role" "ecs_execution_role" {
-  name               = "${local.prefix}-${var.name}-execution-role"
+  name               = "${local.prefix}-execution-role"
   assume_role_policy = file("${path.module}/policies/ecs-execution-role.json")
 }
 
 resource "aws_iam_role_policy" "ecs_execution_role_policy" {
-  name   = "${local.prefix}-${var.name}-execution-policy"
+  name   = "${local.prefix}-execution-policy"
   policy = file("${path.module}/policies/ecs-execution-role-policy.json")
   role   = aws_iam_role.ecs_execution_role.id
 }
@@ -30,7 +30,7 @@ resource "aws_iam_role_policy" "ecs_execution_role_policy" {
 # =======================
 
 resource "aws_iam_role" "ecs_events" {
-  name = "${local.prefix}-${var.name}-scheduler-role"
+  name = "${local.prefix}-scheduler-role"
 
   assume_role_policy = <<DOC
 {
@@ -50,7 +50,7 @@ DOC
 }
 
 resource "aws_iam_role_policy" "ecs_events_run_task_with_any_role" {
-  name = "${local.prefix}-${var.name}-scheduler-policy"
+  name = "${local.prefix}-scheduler-policy"
   role = "${aws_iam_role.ecs_events.id}"
 
   policy = <<DOC
@@ -83,7 +83,7 @@ resource "aws_cloudwatch_log_group" "_" {
 resource "aws_ecs_cluster" "_" {
   count = var.ecs_cluster_id == "" ? 1 : 0
 
-  name = "${local.prefix}-${var.name}-cluster"
+  name = "${local.prefix}-cluster"
   tags = local.common_tags
 }
 
@@ -103,29 +103,24 @@ data "template_file" "_" {
 }
 
 resource "aws_ecs_task_definition" "_" {
-  family                   = "${local.prefix}-${var.name}"
+  family                   = "${local.prefix}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.task_cpu
   memory                   = var.task_memory
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  # task_role_arn            = module.fargate.ecs_task_role_arn
+  task_role_arn            = var.task_role != "" ? var.task_role : ""
   container_definitions    = data.template_file._.rendered
 }
 
+resource "aws_cloudwatch_event_rule" "_" {
+  name        = "${local.prefix}-run-data-ingress-alliances"
+  description = "start data ingress"
+  is_enabled  = var.enabled
+  schedule_expression = var.task_schedule_expression
+}
 
-# // ALLIANCES INGRESS
-# // ========================
-
-# resource "aws_cloudwatch_event_rule" "run_data_ingress_alliances" {
-#   name        = "${local.prefix}-run-data-ingress-alliances"
-#   description = "start data ingress"
-#   is_enabled  = true //   var.data_ingress_schedule_enabled
-#   schedule_expression = "cron(0 5 * * ? *)" // 5AM UTC --> 7AM UTC
-#   # schedule_expression = "rate(1 minute)"
-# }
-
-# resource "aws_cloudwatch_event_target" "scheduled_data_ingress_alliances" {
+# resource "aws_cloudwatch_event_target" "_" {
 #   target_id = "${local.prefix}-data-ingress-target-alliances"
 #   arn       = module.fargate.ecs_cluster_id
 #   rule      = aws_cloudwatch_event_rule.run_data_ingress_alliances.name

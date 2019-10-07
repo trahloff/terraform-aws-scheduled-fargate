@@ -45,3 +45,20 @@ variable "task_memory" {
   type        = number
   default     = 512
 }
+
+variable "task_schedule_expression" {
+  description = "ECS Cluster ARN. If not set, a new cluster will be created"
+  type        = string
+}
+
+variable "task_role" {
+  description = "ECS Cluster ARN. If not set, a new cluster will be created"
+  type        = string
+  default     = ""
+}
+
+variable "enabled" {
+  description = "ECS Cluster ARN. If not set, a new cluster will be created"
+  type        = bool
+  default = true
+}
